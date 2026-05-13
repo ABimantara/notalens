@@ -109,7 +109,6 @@ export const AppNavbar: React.FC = () => {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Sync active tab dengan URL aktif
   useEffect(() => {
     const current = NAV_ITEMS.find(item => NAV_ROUTES[item.label] === pathname)
     if (current) setActiveNav(current.label)
@@ -162,6 +161,8 @@ export const AppNavbar: React.FC = () => {
 }
 
 // ─── Phone Layout ─────────────────────────────────────────────────────────────
+// VERSI 1: Lebar terbatas max 430px, centered di layar
+// Cocok untuk preview di desktop tapi tetap terasa mobile
 interface PhoneLayoutProps {
   children: React.ReactNode
   headerProps?: HeaderProps
@@ -176,48 +177,41 @@ export const PhoneLayout: React.FC<PhoneLayoutProps> = ({
   const { fullBleed } = useNav()
 
   return (
+    // Outer: background netral, centered secara horizontal
     <div style={{
-      minHeight: '100vh', background: '#111', display: 'flex',
-      justifyContent: 'center', alignItems: 'center',
+      minHeight: '100vh',
+      background: '#e8edf5',
+      display: 'flex',
+      justifyContent: 'center',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      padding: '20px',
     }}>
+      {/* Inner: max 430px, full height, tampilan mobile */}
       <div style={{
-        width: '340px', background: '#0a0a0a', borderRadius: '44px',
-        padding: '10px', boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
-        border: '3px solid #222', position: 'relative',
+        width: '100%',
+        maxWidth: '430px',
+        minHeight: '100vh',
+        background: screenBg,
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 0 40px rgba(0,0,0,0.12)',
       }}>
-        <div style={{
-          width: '100%', height: '680px', borderRadius: '36px',
-          overflow: 'hidden', background: screenBg, display: 'flex',
-          flexDirection: 'column', position: 'relative',
-        }}>
-          {/* Notch */}
+        <AppHeader {...headerProps} />
+
+        {fullBleed ? (
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            {children}
+          </div>
+        ) : (
           <div style={{
-            position: 'absolute', top: 0, left: '50%',
-            transform: 'translateX(-50%)', width: '110px', height: '26px',
-            background: '#0a0a0a', borderBottomLeftRadius: '16px',
-            borderBottomRightRadius: '16px', zIndex: 50,
-          }} />
+            flex: 1, overflowY: 'auto', padding: '14px 14px 8px',
+            scrollbarWidth: 'none', msOverflowStyle: 'none',
+          } as React.CSSProperties}>
+            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+            {children}
+          </div>
+        )}
 
-          <AppHeader {...headerProps} />
-
-          {fullBleed ? (
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-              {children}
-            </div>
-          ) : (
-            <div style={{
-              flex: 1, overflowY: 'auto', padding: '14px 14px 8px',
-              scrollbarWidth: 'none', msOverflowStyle: 'none',
-            } as React.CSSProperties}>
-              <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-              {children}
-            </div>
-          )}
-
-          <AppNavbar />
-        </div>
+        <AppNavbar />
       </div>
     </div>
   )

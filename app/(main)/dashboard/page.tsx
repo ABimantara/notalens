@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useNav } from '@/app/components/AppLayout'
+import { logout } from '@/lib/auth'
 
 interface Activity {
   name: string
@@ -35,6 +36,10 @@ const DashboardPage: React.FC = () => {
     setTimeout(() => setPressedAction(null), 180)
   }
 
+  const handleLogout = async () => {
+  await logout()
+  router.push('/')
+}
   function getGreeting() {
     const hour = new Date().getHours()
     if (hour >= 5 && hour < 12) return 'Good Morning'
