@@ -1,6 +1,8 @@
 'use client'
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useNav } from '@/app/components/AppLayout'
+import { useRouter } from 'next/navigation'
+import { useTheme } from '@/context/ThemeContext'
 
 // ─── Flash Icon ───────────────────────────────────────────────────────────────
 const FlashIcon = ({ active, onClick }: { active: boolean; onClick: () => void }) => (
@@ -23,6 +25,8 @@ const ScanPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const router = useRouter()
+  const { darkMode } = useTheme()
 
   // Stable toggle so FlashIcon onClick doesn't recreate on every render
   const toggleFlash = useCallback(() => setFlashOn(prev => !prev), [])
@@ -80,7 +84,10 @@ const ScanPage: React.FC = () => {
     if (!ctx) return
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    alert('Foto berhasil diambil 📸')
+    // Simpan gambar ke sessionStorage lalu ke verify
+    const imageData = canvas.toDataURL('image/jpeg')
+    sessionStorage.setItem('scannedImage', imageData)
+    router.push('/scan/verify')
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -232,12 +239,15 @@ const ScanPage: React.FC = () => {
         accept="image/*"
         style={{ display: 'none' }}
         onChange={e => {
-          const file = e.target.files?.[0]
-          if (!file) return
-          const reader = new FileReader()
-          reader.onload = () => alert('Gambar dipilih 🖼️')
-          reader.readAsDataURL(file)
-        }}
+        const file = e.target.files?.[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = () => {
+          sessionStorage.setItem('scannedImage', reader.result as string)
+          router.push('/scan/verify')
+        }
+        reader.readAsDataURL(file)
+      }}
       />
 
       <style jsx global>{`

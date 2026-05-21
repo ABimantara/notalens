@@ -5,13 +5,13 @@ import { useNav } from '@/app/components/AppLayout'
 import { logout } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
 
-
 export default function SettingsPage() {
   const router = useRouter()
   const { setActiveNav } = useNav()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { darkMode } = useTheme()
 
-  const { darkMode, toggleTheme } = useTheme()
+  const [darkMode, setDarkMode] = useState(false)
   const [user, setUser] = useState({ name: '', email: '' })
   const [avatar, setAvatar] = useState<string | null>(null)
 
@@ -21,7 +21,15 @@ export default function SettingsPage() {
     if (stored) setUser(JSON.parse(stored))
     const savedAvatar = localStorage.getItem('avatar')
     if (savedAvatar) setAvatar(savedAvatar)
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'dark') setDarkMode(true)
   }, [setActiveNav])
+
+  const handleThemeToggle = () => {
+    const next = !darkMode
+    setDarkMode(next)
+    localStorage.setItem('theme', next ? 'dark' : 'light')
+  }
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -84,7 +92,7 @@ export default function SettingsPage() {
   return (
     <div style={{ height: '100%', overflowY: 'auto', background: bg, transition: 'background 0.3s' }}>
 
-      {/* Profile Card */}
+      {/* Profile Card — putih */}
       <div style={{
         background: cardBg, padding: '28px 16px',
         textAlign: 'center', borderBottom: `1px solid ${borderColor}`,
@@ -143,8 +151,6 @@ export default function SettingsPage() {
 
       {/* App Preferences */}
       <SectionLabel title="App Preferences" />
-
-      {/* Dark Mode Toggle */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '14px',
         padding: '14px 16px', background: cardBg,
@@ -163,7 +169,7 @@ export default function SettingsPage() {
           <div style={{ fontSize: '13px', fontWeight: 600, color: textPrimary }}>Dark Mode</div>
           <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{darkMode ? 'On' : 'Off'}</div>
         </div>
-        <div onClick={toggleTheme} style={{
+        <div onClick={handleThemeToggle} style={{
           width: '44px', height: '24px', borderRadius: '12px',
           background: darkMode ? '#0D307F' : '#e2e8f0',
           position: 'relative', cursor: 'pointer', transition: 'background 0.3s',
@@ -177,8 +183,6 @@ export default function SettingsPage() {
           }} />
         </div>
       </div>
-
-      {/* Notifications */}
       <div onClick={() => router.push('/settings/notifications')} style={{
         display: 'flex', alignItems: 'center', gap: '14px',
         padding: '14px 16px', background: cardBg,
