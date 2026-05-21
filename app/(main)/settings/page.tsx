@@ -1,24 +1,9 @@
 'use client'
-<<<<<<< HEAD
-import { useEffect } from 'react'
-import { useNav } from '@/app/components/AppLayout'
-
-export default function SettingsPage() {
-  const { setActiveNav } = useNav()
-  useEffect(() => { setActiveNav('SETTINGS') }, [])
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-      <div style={{ fontSize: '40px' }}>⚙️</div>
-      <p style={{ fontSize: '16px', fontWeight: 800, color: '#0a1a3a', margin: 0 }}>Settings</p>
-      <p style={{ fontSize: '12px', color: '#7a90b0', margin: 0 }}>Coming soon</p>
-=======
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useNav } from '@/app/components/AppLayout'
 import { logout } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
-
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -142,23 +127,19 @@ export default function SettingsPage() {
         icon={<svg width="16" height="16" fill="none" stroke="#0D307F" strokeWidth="2" viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
         </svg>}
-        label="Edit Profile"
-        sub="Change name & photo"
+        label="Edit Profile" sub="Change name & photo"
         onClick={() => router.push('/settings/edit-profile')}
       />
       <Row
         icon={<svg width="16" height="16" fill="none" stroke="#0D307F" strokeWidth="2" viewBox="0 0 24 24">
           <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
         </svg>}
-        label="Security"
-        sub="Change password"
+        label="Security" sub="Change password"
         onClick={() => router.push('/settings/change-password')}
       />
 
       {/* App Preferences */}
       <SectionLabel title="App Preferences" />
-
-      {/* Dark Mode Toggle */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '14px',
         padding: '14px 16px', background: cardBg,
@@ -191,8 +172,6 @@ export default function SettingsPage() {
           }} />
         </div>
       </div>
-
-      {/* Notifications */}
       <div onClick={() => router.push('/settings/notifications')} style={{
         display: 'flex', alignItems: 'center', gap: '14px',
         padding: '14px 16px', background: cardBg,
@@ -222,8 +201,7 @@ export default function SettingsPage() {
         icon={<svg width="16" height="16" fill="none" stroke="#0D307F" strokeWidth="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
         </svg>}
-        label="About"
-        sub="NotaLens v1.0.0"
+        label="About" sub="NotaLens v1.0.0"
       />
 
       {/* Logout */}
@@ -246,7 +224,6 @@ export default function SettingsPage() {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
->>>>>>> main
     </div>
   )
 }

@@ -1,18 +1,4 @@
 'use client'
-<<<<<<< HEAD
-import { useEffect } from 'react'
-import { useNav } from '@/app/components/AppLayout'
-
-export default function RecapPage() {
-  const { setActiveNav } = useNav()
-  useEffect(() => { setActiveNav('RECAP') }, [])
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-      <div style={{ fontSize: '40px' }}>📄</div>
-      <p style={{ fontSize: '16px', fontWeight: 800, color: '#0a1a3a', margin: 0 }}>Recap</p>
-      <p style={{ fontSize: '12px', color: '#7a90b0', margin: 0 }}>Coming soon</p>
-=======
 import React, { useState } from 'react'
 import { useNav } from '@/app/components/AppLayout'
 import { useTheme } from '@/context/ThemeContext'
@@ -60,38 +46,24 @@ export default function RecapPage() {
 
   const handleExportPDF = () => {
     const doc = new jsPDF()
-
     doc.setFontSize(18)
     doc.setTextColor(13, 48, 127)
     doc.text('NotaLens', 14, 18)
-
     doc.setFontSize(11)
     doc.setTextColor(100, 116, 139)
     doc.text('Rekap Pengeluaran Pribadi', 14, 26)
     doc.text(`${MONTHS[monthIndex]} ${year}`, 14, 33)
-
     doc.setFontSize(12)
     doc.setTextColor(13, 48, 127)
     doc.text(`Total: ${formatRp(total)}`, 14, 42)
-
     autoTable(doc, {
       startY: 50,
       head: [['Toko', 'Tanggal', 'Kategori', 'Jumlah']],
-      body: dummyTransactions.map(tx => [
-        tx.store,
-        tx.date,
-        tx.category,
-        formatRp(tx.amount),
-      ]),
-      headStyles: {
-        fillColor: [13, 48, 127],
-        textColor: 255,
-        fontStyle: 'bold',
-      },
+      body: dummyTransactions.map(tx => [tx.store, tx.date, tx.category, formatRp(tx.amount)]),
+      headStyles: { fillColor: [13, 48, 127], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [239, 246, 255] },
       styles: { fontSize: 10, cellPadding: 6 },
     })
-
     doc.save(`NotaLens_${MONTHS[monthIndex]}_${year}.pdf`)
   }
 
@@ -102,16 +74,10 @@ export default function RecapPage() {
       [`Total Pengeluaran: ${formatRp(total)}`],
       [],
       ['Toko', 'Tanggal', 'Kategori', 'Jumlah'],
-      ...dummyTransactions.map(tx => [
-        tx.store,
-        tx.date,
-        tx.category,
-        formatRp(tx.amount),
-      ]),
+      ...dummyTransactions.map(tx => [tx.store, tx.date, tx.category, formatRp(tx.amount)]),
       [],
       ['', '', 'TOTAL', formatRp(total)],
     ]
-
     const ws = XLSX.utils.aoa_to_sheet(wsData)
     ws['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 18 }, { wch: 15 }]
     const wb = XLSX.utils.book_new()
@@ -125,7 +91,6 @@ export default function RecapPage() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       transition: 'background 0.3s',
     }}>
-
       {/* Month Selector */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -147,16 +112,12 @@ export default function RecapPage() {
           <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', opacity: 0.7, marginBottom: '8px' }}>
             TOTAL PENGELUARAN
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px' }}>
-            {formatRp(total)}
-          </div>
+          <div style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px' }}>{formatRp(total)}</div>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px',
             background: 'rgba(255,255,255,0.15)', borderRadius: '20px',
             padding: '4px 10px', fontSize: '11px', fontWeight: 600,
-          }}>
-            ↓ 12% from last month
-          </div>
+          }}>↓ 12% from last month</div>
         </div>
 
         {/* Filter */}
@@ -245,8 +206,7 @@ export default function RecapPage() {
                   <div style={{
                     display: 'inline-block', marginTop: '4px',
                     background: darkMode ? '#1e3a5f' : '#eff6ff', color: '#0D307F',
-                    fontSize: '10px', fontWeight: 700, padding: '2px 8px',
-                    borderRadius: '10px',
+                    fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px',
                   }}>{tx.category}</div>
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 800, color: '#0D307F' }}>
@@ -258,7 +218,6 @@ export default function RecapPage() {
         </div>
 
       </div>
->>>>>>> main
     </div>
   )
 }
