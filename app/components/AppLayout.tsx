@@ -80,11 +80,15 @@ export const AppHeader: React.FC<HeaderProps> = ({ rightSlot }) => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Image src="/logo.png" alt="NotaLens" width={28} height={28}
-            style={{ borderRadius: '8px', objectFit: 'cover' }} />
+            style={{ 
+              borderRadius: '8px', objectFit: 'cover',
+              filter: darkMode ? 'brightness(2) saturate(0.5)' : 'none',
+              opacity: darkMode ? 0.9 : 1,
+            }} />
           <span style={{
-            fontSize: '14px', fontWeight: 800, letterSpacing: '1px',
-            color: '#0D307F', fontFamily: 'Georgia, serif',
-          }}>NotaLens</span>
+              fontSize: '14px', fontWeight: 800, letterSpacing: '1px',
+              color: darkMode ? '#7aa5f5' : '#0D307F', fontFamily: 'Georgia, serif',
+            }}>NotaLens</span>
         </div>
         {right}
       </div>
@@ -101,7 +105,7 @@ export const AppNavbar: React.FC = () => {
 
   const navBg = darkMode ? '#1e293b' : '#fff'
   const borderColor = darkMode ? '#334155' : '#dce3ef'
-  const inactiveColor = darkMode ? '#4a5568' : '#b0bdd0'
+  const inactiveColor = darkMode ? '#64748b' : '#b0bdd0'
   const activeItemBg = darkMode ? '#1e3a5f' : '#eaf0fb'
 
   useEffect(() => {

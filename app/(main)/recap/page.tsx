@@ -174,7 +174,7 @@ export default function RecapPage() {
               <div key={cat.name}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ fontSize: '12px', color: textSecondary }}>{cat.name}</span>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0D307F' }}>{formatRp(cat.amount)}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: darkMode ? '#7aa5f5' : '#0D307F' }}>{formatRp(cat.amount)}</span>
                 </div>
                 <div style={{ height: '4px', background: borderColor, borderRadius: '2px' }}>
                   <div style={{
@@ -209,7 +209,7 @@ export default function RecapPage() {
                     fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px',
                   }}>{tx.category}</div>
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: '#0D307F' }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: darkMode ? '#7aa5f5' : '#0D307F' }}>
                   {formatRp(tx.amount)}
                 </div>
               </div>
