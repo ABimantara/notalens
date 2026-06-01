@@ -9,6 +9,7 @@ import { verifyToken, getTokenFromHeader } from '@/lib/jwt';
 const PUBLIC_ROUTES = [
   '/api/auth/register',
   '/api/auth/login',
+  '/api/auth/reset-password',
 ];
 
 export function middleware(req: NextRequest) {

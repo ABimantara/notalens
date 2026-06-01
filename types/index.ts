@@ -60,6 +60,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   message: string;
   token?: string;

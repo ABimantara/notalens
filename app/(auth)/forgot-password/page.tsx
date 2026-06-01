@@ -43,16 +43,17 @@ export default function ForgotPasswordPage() {
 
     setLoading(true)
     try {
-      // TODO: sambungkan ke BE kalau endpoint sudah ada
-      // const res = await fetch('/api/auth/reset-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, newPassword }),
-      // })
-      // const data = await res.json()
-      // if (!res.ok) { setError(data.error); return }
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Gagal mereset password')
+        return
+      }
 
-      await new Promise(r => setTimeout(r, 1000))
       setDone(true)
     } catch {
       setError('Terjadi kesalahan. Coba lagi.')
