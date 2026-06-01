@@ -153,7 +153,13 @@ const LoginPage = () => {
                 }}>
                   Password
                 </label>
-                <span style={{ fontSize: '10px', color: '#0D307F', fontWeight: 700, cursor: 'pointer' }}>
+                <span
+                  onClick={() => router.push('/forgot-password')}
+                  style={{
+                    fontSize: '10px', color: '#0D307F',
+                    fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
                   Forgot Password?
                 </span>
               </div>
