@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTheme } from '@/context/ThemeContext'
 
-// ─── Nav Context ──────────────────────────────────────────────────────────────
 interface NavContextType {
   activeNav: string
   setActiveNav: (label: string) => void
@@ -41,19 +40,35 @@ const NAV_ITEMS = [
   { label: 'SETTINGS', svg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>` },
 ]
 
-// ─── Header ───────────────────────────────────────────────────────────────────
 interface HeaderProps {
   rightSlot?: React.ReactNode
 }
 
 export const AppHeader: React.FC<HeaderProps> = ({ rightSlot }) => {
   const [user, setUser] = useState<{ name?: string }>({})
+  const [avatar, setAvatar] = useState<string | null>(null)
   const { headerSlot } = useNav()
   const { darkMode } = useTheme()
 
   useEffect(() => {
     const stored = localStorage.getItem('user')
     if (stored) setUser(JSON.parse(stored))
+    const savedAvatar = localStorage.getItem('avatar')
+    if (savedAvatar) setAvatar(savedAvatar)
+
+    const handleStorage = () => {
+      const s = localStorage.getItem('user')
+      if (s) setUser(JSON.parse(s))
+      const a = localStorage.getItem('avatar')
+      setAvatar(a)
+    }
+
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('avatarUpdated', handleStorage)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('avatarUpdated', handleStorage)
+    }
   }, [])
 
   const bgColor = darkMode ? '#1e293b' : '#f0f4fa'
@@ -62,10 +77,14 @@ export const AppHeader: React.FC<HeaderProps> = ({ rightSlot }) => {
   const defaultRight = (
     <div style={{
       width: '32px', height: '32px', borderRadius: '50%',
-      background: '#0D307F', display: 'flex', alignItems: 'center',
+      background: '#0D307F', overflow: 'hidden',
+      display: 'flex', alignItems: 'center',
       justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: '#fff',
     }}>
-      {user.name?.charAt(0).toUpperCase() || 'U'}
+      {avatar
+        ? <img src={avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : user.name?.charAt(0).toUpperCase() || 'U'
+      }
     </div>
   )
 
@@ -80,15 +99,15 @@ export const AppHeader: React.FC<HeaderProps> = ({ rightSlot }) => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Image src="/logo.png" alt="NotaLens" width={28} height={28}
-            style={{ 
+            style={{
               borderRadius: '8px', objectFit: 'cover',
               filter: darkMode ? 'brightness(2) saturate(0.5)' : 'none',
               opacity: darkMode ? 0.9 : 1,
             }} />
           <span style={{
-              fontSize: '14px', fontWeight: 800, letterSpacing: '1px',
-              color: darkMode ? '#7aa5f5' : '#0D307F', fontFamily: 'Georgia, serif',
-            }}>NotaLens</span>
+            fontSize: '14px', fontWeight: 800, letterSpacing: '1px',
+            color: darkMode ? '#7aa5f5' : '#0D307F', fontFamily: 'Georgia, serif',
+          }}>NotaLens</span>
         </div>
         {right}
       </div>
@@ -96,7 +115,6 @@ export const AppHeader: React.FC<HeaderProps> = ({ rightSlot }) => {
   )
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
 export const AppNavbar: React.FC = () => {
   const { activeNav, setActiveNav } = useNav()
   const { darkMode } = useTheme()
@@ -150,7 +168,6 @@ export const AppNavbar: React.FC = () => {
   )
 }
 
-// ─── Phone Layout ─────────────────────────────────────────────────────────────
 interface PhoneLayoutProps {
   children: React.ReactNode
   headerProps?: HeaderProps
@@ -176,7 +193,6 @@ export const PhoneLayout: React.FC<PhoneLayoutProps> = ({ children, headerProps 
         boxShadow: '0 0 40px rgba(0,0,0,0.12)', transition: 'background 0.3s',
       }}>
         <AppHeader {...headerProps} />
-
         {fullBleed ? (
           <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
             {children}
@@ -190,14 +206,12 @@ export const PhoneLayout: React.FC<PhoneLayoutProps> = ({ children, headerProps 
             {children}
           </div>
         )}
-
         <AppNavbar />
       </div>
     </div>
   )
 }
 
-// ─── App Layout (Provider) ────────────────────────────────────────────────────
 interface AppLayoutProps {
   children: React.ReactNode
   defaultNav?: string

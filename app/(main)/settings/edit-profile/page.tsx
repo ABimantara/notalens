@@ -30,17 +30,18 @@ export default function EditProfilePage() {
     if (savedAvatar) setAvatar(savedAvatar)
   }, [])
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      setAvatar(result)
-      localStorage.setItem('avatar', result)
-    }
-    reader.readAsDataURL(file)
+const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    const result = reader.result as string
+    setAvatar(result)
+    localStorage.setItem('avatar', result)
+    window.dispatchEvent(new Event('avatarUpdated')) // ← tambah ini
   }
+  reader.readAsDataURL(file)
+}
 
   const handleSave = () => {
     const stored = localStorage.getItem('user')

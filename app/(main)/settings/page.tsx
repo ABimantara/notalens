@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useNav } from '@/app/components/AppLayout'
 import { logout } from '@/lib/auth'
@@ -8,9 +8,8 @@ import { useTheme } from '@/context/ThemeContext'
 export default function SettingsPage() {
   const router = useRouter()
   const { setActiveNav } = useNav()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
   const { darkMode, toggleTheme } = useTheme()
+
   const [user, setUser] = useState({ name: '', email: '' })
   const [avatar, setAvatar] = useState<string | null>(null)
 
@@ -20,19 +19,16 @@ export default function SettingsPage() {
     if (stored) setUser(JSON.parse(stored))
     const savedAvatar = localStorage.getItem('avatar')
     if (savedAvatar) setAvatar(savedAvatar)
-  }, [setActiveNav])
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      setAvatar(result)
-      localStorage.setItem('avatar', result)
+    const handleAvatarUpdate = () => {
+      const a = localStorage.getItem('avatar')
+      setAvatar(a)
+      const s = localStorage.getItem('user')
+      if (s) setUser(JSON.parse(s))
     }
-    reader.readAsDataURL(file)
-  }
+    window.addEventListener('avatarUpdated', handleAvatarUpdate)
+    return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate)
+  }, [setActiveNav])
 
   const handleLogout = async () => {
     await logout()
@@ -101,18 +97,6 @@ export default function SettingsPage() {
                   {user.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
             }
-          </div>
-          <div onClick={() => fileInputRef.current?.click()} style={{
-            position: 'absolute', bottom: 0, right: 0,
-            width: '24px', height: '24px', borderRadius: '50%',
-            background: '#0D307F', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-          }}>
-            <svg width="12" height="12" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
           </div>
         </div>
         <div style={{ fontSize: '18px', fontWeight: 800, color: textPrimary }}>{user.name}</div>
@@ -222,8 +206,6 @@ export default function SettingsPage() {
           NOTALENS v1.0.0
         </div>
       </div>
-
-      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
     </div>
   )
 }
