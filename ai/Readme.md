@@ -1,13 +1,3 @@
----
-title: Notalens Ai
-emoji: 📊
-colorFrom: yellow
-colorTo: indigo
-sdk: docker
-pinned: false
-license: mit
----
-
 # NotaLens AI — Receipt Scanner API
 
 API untuk scan dan ekstraksi data struk belanja secara otomatis menggunakan AI.
@@ -49,7 +39,8 @@ Ekstrak data dari gambar struk belanja.
     {
       "nama_item": "Ai-Milk Tea",
       "qty": 1,
-      "harga": 19000
+      "harga": 19000,
+      "subtotal": 19000
     }
   ],
   "total_pengeluaran": 19000
