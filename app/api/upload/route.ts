@@ -13,8 +13,10 @@ const FASTAPI_URL = process.env.FASTAPI_URL ?? 'http://localhost:8000';
 
 export async function POST(req: NextRequest) {
   // --- Auth check ---
+  // Middleware already validated the token and injected x-user-id,
+  // but we re-verify here so the route is self-contained.
   const token = getTokenFromHeader(req.headers.get('authorization'));
-  const payload = token ? verifyToken(token) : null;
+  const payload = token ? await verifyToken(token) : null;
 
   if (!payload) {
     return NextResponse.json<ApiError>(
@@ -56,7 +58,6 @@ export async function POST(req: NextRequest) {
     // --- Forward ke FastAPI ---
     const forwardForm = new FormData();
     forwardForm.append('file', file);
-    forwardForm.append('user_id', String(payload.user_id)); // kirim user_id ke FastAPI
 
     const fastApiResponse = await fetch(`${FASTAPI_URL}/ekstrak-struk`, {
       method: 'POST',

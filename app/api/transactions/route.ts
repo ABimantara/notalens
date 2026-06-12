@@ -27,11 +27,13 @@ function mapItemsFromJson(raw: string | null): CreateTransactionItemInput[] {
   try {
     const parsed = JSON.parse(raw) as ReceiptItem[];
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((row) => ({
-      item_name: row.nama_item?.trim() || 'Item',
-      price: parseIdrAmount(row.harga),
-      quantity: 1,
-    }));
+    return parsed
+      .filter((row) => row.nama_item?.trim())  // skip blank-name items
+      .map((row) => ({
+        item_name: row.nama_item.trim(),
+        price: parseIdrAmount(row.harga),
+        quantity: 1,
+      }));
   } catch {
     return [];
   }

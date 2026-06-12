@@ -12,7 +12,7 @@ export async function dataUrlToFile(
 
 export function parseRpAmount(value: string | null | undefined): string {
   if (!value) return '';
-  return value.replace(/^Rp\s?/i, '').trim();
+  return value.replace(/^Rp\.?\s*/i, '').trim();
 }
 
 /** Parse berbagai format tanggal dari OCR ke YYYY-MM-DD */
@@ -21,7 +21,7 @@ export function parseDate(value: string | null | undefined): string {
 
   const MONTHS: Record<string, string> = {
     jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
-    june: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+    jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
     januari: '01', februari: '02', maret: '03', april: '04', mei: '05',
     juni: '06', juli: '07', agustus: '08', september: '09', oktober: '10',
     november: '11', desember: '12',
@@ -39,22 +39,13 @@ export function parseDate(value: string | null | undefined): string {
     return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`
   }
 
-  // Format: "14 june 26" atau "14 Jun 2026"
+  // Format: "14 Juni 2024" or "10 May 19" (Indonesian or English month names, 2 or 4 digit year)
   const textMatch = value.match(/(\d{1,2})\s+([a-zA-Z]+)\s+(\d{2,4})/)
   if (textMatch) {
     const day = textMatch[1].padStart(2, '0')
     const month = MONTHS[textMatch[2].toLowerCase()] || '01'
     let year = textMatch[3]
     if (year.length === 2) year = '20' + year
-    return `${year}-${month}-${day}`
-  }
-
-  // Format: "10 May 19" (dari struk lama)
-  const oldMatch = value.match(/(\d{1,2})\s+([a-zA-Z]+)\s+(\d{2})/)
-  if (oldMatch) {
-    const day = oldMatch[1].padStart(2, '0')
-    const month = MONTHS[oldMatch[2].toLowerCase()] || '01'
-    const year = '20' + oldMatch[3]
     return `${year}-${month}-${day}`
   }
 

@@ -17,6 +17,38 @@ except Exception as e:
     raise RuntimeError(f"Gagal memuat model: {e}")
 
 
+def normalise_price(raw: str) -> str:
+    """Normalise a raw price string to 'Rp X.XXX' format."""
+    # Remove everything except digits, dots, commas
+    digits = re.sub(r'[^\d.,]', '', raw)
+    if not digits:
+        return raw
+    # Indonesian thousands separator: dots → remove, comma → dot for decimals
+    if ',' in digits and '.' in digits:
+        last_comma = digits.rfind(',')
+        last_dot = digits.rfind('.')
+        if last_comma > last_dot:
+            digits = digits.replace('.', '').replace(',', '.')
+        else:
+            digits = digits.replace(',', '')
+    elif ',' in digits:
+        parts = digits.split(',')
+        if len(parts) == 2 and len(parts[1]) <= 2:
+            digits = parts[0] + '.' + parts[1]
+        else:
+            digits = digits.replace(',', '')
+    elif '.' in digits:
+        parts = digits.split('.')
+        # multiple dots or 3-digit decimal = thousands separator
+        if len(parts) > 2 or (len(parts) == 2 and len(parts[1]) == 3):
+            digits = digits.replace('.', '')
+    try:
+        n = float(digits)
+        return f"Rp {n:,.0f}".replace(',', '.')
+    except ValueError:
+        return f"Rp {digits}"
+
+
 def parse_receipt(hasil_ekstraksi: list[str], hasil_full: list[str]) -> dict:
     data_struk = {
         "nama_toko": "Tidak Terdeteksi",
@@ -25,48 +57,105 @@ def parse_receipt(hasil_ekstraksi: list[str], hasil_full: list[str]) -> dict:
         "total_pengeluaran": None
     }
 
-    pola_harga = r'(?:Rp\s?)?(\d{1,3}(?:[.,]\d{3})+)'
+    # Price pattern — matches standalone amounts with thousand separators
+    pola_harga = re.compile(
+        r'(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\b'
+    )
 
-    # Nama toko dari baris kedua OCR full
-    if len(hasil_full) > 1:
-        data_struk["nama_toko"] = hasil_full[1].replace('"', '').strip()
+    # ── Store name ─────────────────────────────────────────────────────────────
+    # Skip lines that look like addresses/phone numbers; take first meaningful line
+    skip_patterns = re.compile(
+        r'^\d+$|telp|phone|fax|jl\.|jalan|no\.|npwp|www\.|\.com', re.IGNORECASE
+    )
+    for baris in hasil_full[:5]:
+        baris_clean = baris.replace('"', '').strip()
+        if baris_clean and not skip_patterns.search(baris_clean) and len(baris_clean) >= 3:
+            data_struk["nama_toko"] = baris_clean
+            break
 
-    # Tanggal dari OCR full
+    # ── Date ───────────────────────────────────────────────────────────────────
+    pola_tanggal = re.compile(
+        r'(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}'         # DD/MM/YYYY or DD-MM-YYYY
+        r'|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}'            # YYYY-MM-DD
+        r'|\d{1,2}\s+\w+\s+\d{2,4})'                   # 14 Juni 2024
+    )
     for baris in hasil_full:
-        match_tanggal = re.search(r'(\d{1,2}\s+\w+\s+\d{2,4})', baris)
-        if match_tanggal:
-            data_struk["tanggal"] = match_tanggal.group(1)
+        m = pola_tanggal.search(baris)
+        if m:
+            data_struk["tanggal"] = m.group(1)
             break
 
-    # Total dari OCR full (baris setelah kata "Total")
+    # ── Total ──────────────────────────────────────────────────────────────────
+    # Look for a line containing "total" then grab the largest number on that
+    # line or the next line
+    total_keywords = re.compile(r'\b(total|grand\s*total|jumlah)\b', re.IGNORECASE)
     for i, baris in enumerate(hasil_full):
-        if baris.lower() == 'total':
+        if total_keywords.search(baris):
+            # Try same line first, then next line
+            candidates = [baris]
             if i + 1 < len(hasil_full):
-                match_harga = re.search(pola_harga, hasil_full[i + 1])
-                if match_harga:
-                    data_struk["total_pengeluaran"] = "Rp " + match_harga.group(1).replace(',', '.')
-            break
+                candidates.append(hasil_full[i + 1])
+            for candidate in candidates:
+                matches = pola_harga.findall(candidate)
+                if matches:
+                    # Pick the largest value (most likely to be the total)
+                    best = max(matches, key=lambda x: float(
+                        re.sub(r'[.,](?=\d{3})', '', x).replace(',', '.')
+                    ) if re.search(r'\d', x) else 0)
+                    data_struk["total_pengeluaran"] = normalise_price(best)
+                    break
+            if data_struk["total_pengeluaran"]:
+                break
 
-    # Parsing item dari hasil YOLO crop
-    harga_buffer = None
+    # ── Line items from YOLO crops ─────────────────────────────────────────────
+    # Each YOLO crop contains one item line. Format varies:
+    #   "Indomie Goreng         2.500"   → name then price on same line
+    #   "Indomie Goreng"                 → name only (price on next line)
+    #   "2.500"                          → price only (name on previous line)
+    nama_buffer = None
     for i, baris in enumerate(hasil_ekstraksi):
-        match_harga = re.search(pola_harga, baris)
-        if match_harga:
-            angka = "Rp " + match_harga.group(1).replace(',', '.')
-            if angka != data_struk["total_pengeluaran"]:
-                if i + 1 < len(hasil_ekstraksi):
-                    nama_candidate = hasil_ekstraksi[i + 1]
-                    if not re.search(pola_harga, nama_candidate):
-                        harga_buffer = angka
+        baris = baris.strip()
+        if not baris or total_keywords.search(baris):
+            nama_buffer = None
             continue
 
-        if "total" not in baris.lower():
-            harga = harga_buffer
-            harga_buffer = None
+        price_matches = pola_harga.findall(baris)
+
+        # Remove price tokens to get the name portion
+        nama_portion = pola_harga.sub('', baris).strip(' :-')
+
+        if nama_portion and price_matches:
+            # Name and price on same line
+            best_price = max(price_matches, key=lambda x: float(
+                re.sub(r'[.,](?=\d{3})', '', x).replace(',', '.')
+            ) if re.search(r'\d', x) else 0)
             data_struk["items"].append({
-                "nama_item": baris.strip(),
-                "harga": harga
+                "nama_item": nama_portion,
+                "harga": normalise_price(best_price)
             })
+            nama_buffer = None
+
+        elif nama_portion and not price_matches:
+            # Name only — buffer it, price may follow
+            nama_buffer = nama_portion
+
+        elif price_matches and not nama_portion:
+            # Price only — attach to buffered name
+            best_price = max(price_matches, key=lambda x: float(
+                re.sub(r'[.,](?=\d{3})', '', x).replace(',', '.')
+            ) if re.search(r'\d', x) else 0)
+            price_str = normalise_price(best_price)
+            # Don't add if this is the grand total
+            if price_str != data_struk["total_pengeluaran"]:
+                if nama_buffer:
+                    data_struk["items"].append({
+                        "nama_item": nama_buffer,
+                        "harga": price_str
+                    })
+                    nama_buffer = None
+                else:
+                    # Orphan price — skip
+                    pass
 
     return data_struk
 
