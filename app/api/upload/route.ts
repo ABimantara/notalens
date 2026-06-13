@@ -97,10 +97,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// Tingkatkan limit body size untuk upload file
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

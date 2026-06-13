@@ -1,3 +1,14 @@
+---
+title: NotaLens AI
+emoji: 🧾
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
+
 # NotaLens AI — Receipt Scanner API
 
 API untuk scan dan ekstraksi data struk belanja secara otomatis menggunakan AI.
