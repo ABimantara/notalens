@@ -9,9 +9,10 @@ import { verifyToken, getTokenFromHeader } from '@/lib/jwt';
 const PUBLIC_ROUTES = [
   '/api/auth/register',
   '/api/auth/login',
+  '/api/auth/reset-password',
 ];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Lewatkan public routes
@@ -24,9 +25,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Cek token
+  // Cek token (jose — compatible with Edge runtime)
   const token = getTokenFromHeader(req.headers.get('authorization'));
-  const payload = token ? verifyToken(token) : null;
+  const payload = token ? await verifyToken(token) : null;
 
   if (!payload) {
     return NextResponse.json(

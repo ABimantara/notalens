@@ -59,7 +59,18 @@ def run_ocr(preprocessed_image):
     lines = [text for (_, text, conf) in results if conf > 0.1]
     return "\n".join(lines)
 
+KATEGORI_LIST = [
+    "Groceries",
+    "Food & Beverage",
+    "Transportation",
+    "Shopping",
+    "Health",
+    "Entertainment",
+    "Other",
+]
+
 def parse_with_llm(raw_text: str) -> dict:
+    kategori_options = ", ".join(f'"{k}"' for k in KATEGORI_LIST)
     prompt = f"""Kamu adalah asisten yang bertugas mengekstrak informasi dari teks struk belanja.
 
 Teks OCR mentah dari struk:
@@ -71,6 +82,7 @@ Kembalikan HANYA format JSON berikut, tanpa penjelasan apapun:
 {{
   "nama_toko": null,
   "tanggal": null,
+  "kategori": null,
   "items": [
     {{
       "nama_item": "string",
@@ -79,6 +91,7 @@ Kembalikan HANYA format JSON berikut, tanpa penjelasan apapun:
       "subtotal": null
     }}
   ],
+  "pajak": null,
   "total_pengeluaran": null
 }}
 
@@ -86,15 +99,17 @@ Aturan:
 - qty berupa NUMBER (contoh: 2 bukan "2x")
 - harga berupa NUMBER (contoh: 12000 bukan "Rp 12.000")
 - subtotal berupa NUMBER hasil qty x harga (contoh: qty=2, harga=12000 maka subtotal=24000)
-- total_pengeluaran berupa NUMBER
+- pajak berupa NUMBER (cari label PPN, VAT, Tax, Pajak, atau sejenisnya di struk; isi null jika tidak ada)
+- total_pengeluaran berupa NUMBER (jumlah akhir termasuk pajak)
 - Perbaiki typo OCR jika ada
 - tanggal dikonversi ke format DD-MM-YYYY apapun format aslinya
-- Jika tidak ditemukan, isi null
+- kategori HARUS salah satu dari: {kategori_options}. Pilih berdasarkan jenis toko/item. Jika tidak yakin gunakan "Other"
+- Jika tidak ditemukan, isi null (kecuali kategori yang selalu harus diisi)
 - Hanya kembalikan JSON, tidak ada teks lain"""
 
     try:
        response = client_llm.models.generate_content(
-                 model="gemini-3.5-flash",
+                 model="gemini-3.1-flash-lite",
                 contents=prompt)
        raw_response = response.text.strip()
        raw_response = re.sub(r'^```json\s*', '', raw_response)
@@ -104,7 +119,9 @@ Aturan:
         return {
             "nama_toko": None,
             "tanggal": None,
+            "kategori": "Other",
             "items": [],
+            "pajak": None,
             "total_pengeluaran": None
         }
     except Exception as e:

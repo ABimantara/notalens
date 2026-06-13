@@ -10,7 +10,7 @@ import { getTokenFromHeader, verifyToken } from '@/lib/jwt';
 export async function POST(req: NextRequest) {
   const token = getTokenFromHeader(req.headers.get('authorization'));
 
-  if (!token || !verifyToken(token)) {
+  if (!token || !(await verifyToken(token))) {
     return NextResponse.json(
       { error: 'Token tidak valid atau sudah expired' },
       { status: 401 }

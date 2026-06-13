@@ -34,9 +34,14 @@ export interface Transaction {
   total_amount: number;
   tax_amount: number | null;
   transaction_date: string;
+  /** Expense label from scan UI (Groceries, etc.) */
   notes: string | null;
   receipt_url: string | null;
   created_at: string;
+}
+
+export interface TransactionWithItems extends Transaction {
+  items: TransactionItem[];
 }
 
 export interface TransactionItem {
@@ -60,6 +65,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   message: string;
   token?: string;
@@ -68,6 +78,46 @@ export interface AuthResponse {
 
 export interface ApiError {
   error: string;
+}
+
+export interface ReceiptItem {
+  nama_item: string;
+  harga: string | number | null;
+  qty?: number | null;
+  subtotal?: number | null;
+}
+
+export interface ReceiptExtraction {
+  nama_toko: string;
+  tanggal: string | null;
+  kategori: string | null;
+  items: ReceiptItem[];
+  pajak: number | null;
+  total_pengeluaran: string | number | null;
+}
+
+export interface UploadResponse {
+  message: string;
+  data: ReceiptExtraction;
+}
+
+export interface CreateTransactionItemInput {
+  item_name: string;
+  price: number;
+  quantity?: number;
+}
+
+export interface TransactionListResponse {
+  transactions: TransactionWithItems[];
+  summary: {
+    total_expenses: number;
+    by_category: { name: string; amount: number }[];
+  };
+}
+
+export interface CreateTransactionResponse {
+  message: string;
+  transaction: TransactionWithItems;
 }
 
 export interface JWTPayload {

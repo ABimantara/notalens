@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- Buat JWT token ---
-    const token = signToken({ user_id: user.user_id, email: user.email });
+    const token = await signToken({ user_id: user.user_id, email: user.email });
 
     // Hapus password dari response
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

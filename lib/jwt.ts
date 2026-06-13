@@ -1,20 +1,39 @@
 // ============================================================
-// NotaLens - JWT Utilities
+// NotaLens - JWT Utilities (jose — works in Edge middleware + Node routes)
 // ============================================================
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 import { JWTPayload } from '@/types';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = '7d'; // token berlaku 7 hari
+const JWT_EXPIRES_IN = '7d';
 
-export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+function getSecretKey() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not set');
+  }
+  return new TextEncoder().encode(secret);
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function signToken(payload: JWTPayload): Promise<string> {
+  return new SignJWT({
+    user_id: payload.user_id,
+    email: payload.email,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(JWT_EXPIRES_IN)
+    .sign(getSecretKey());
+}
+
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
+    const { payload } = await jwtVerify(token, getSecretKey());
+    const user_id = payload.user_id;
+    const email = payload.email;
+    if (typeof user_id !== 'number' || typeof email !== 'string') {
+      return null;
+    }
+    return { user_id, email };
   } catch {
     return null;
   }

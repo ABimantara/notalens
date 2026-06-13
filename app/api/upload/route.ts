@@ -13,8 +13,10 @@ const FASTAPI_URL = process.env.FASTAPI_URL ?? 'http://localhost:8000';
 
 export async function POST(req: NextRequest) {
   // --- Auth check ---
+  // Middleware already validated the token and injected x-user-id,
+  // but we re-verify here so the route is self-contained.
   const token = getTokenFromHeader(req.headers.get('authorization'));
-  const payload = token ? verifyToken(token) : null;
+  const payload = token ? await verifyToken(token) : null;
 
   if (!payload) {
     return NextResponse.json<ApiError>(
@@ -56,18 +58,27 @@ export async function POST(req: NextRequest) {
     // --- Forward ke FastAPI ---
     const forwardForm = new FormData();
     forwardForm.append('file', file);
-    forwardForm.append('user_id', String(payload.user_id)); // kirim user_id ke FastAPI
 
-    const fastApiResponse = await fetch(`${FASTAPI_URL}/ocr/process`, {
-      method: 'POST',
-      body: forwardForm,
-    });
+    let fastApiResponse: Response;
+    try {
+      fastApiResponse = await fetch(`${FASTAPI_URL}/ekstrak-struk`, {
+        method: 'POST',
+        body: forwardForm,
+        signal: AbortSignal.timeout(60_000), // 60s — Gemini can be slow
+      });
+    } catch (fetchErr) {
+      console.error('FastAPI unreachable:', fetchErr);
+      return NextResponse.json<ApiError>(
+        { error: 'Server AI tidak dapat dihubungi. Pastikan FastAPI berjalan di port 8000.' },
+        { status: 502 }
+      );
+    }
 
     if (!fastApiResponse.ok) {
       const errText = await fastApiResponse.text();
-      console.error('FastAPI error:', errText);
+      console.error(`FastAPI ${fastApiResponse.status}:`, errText);
       return NextResponse.json<ApiError>(
-        { error: 'Gagal memproses struk, coba lagi' },
+        { error: `Gagal memproses struk (AI ${fastApiResponse.status}): ${errText.slice(0, 200)}` },
         { status: 502 }
       );
     }
