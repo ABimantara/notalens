@@ -67,6 +67,11 @@ export async function POST(req: NextRequest) {
 
     const targetUrl = `${FASTAPI_URL}/ekstrak-struk`;
     console.log('[upload] Forwarding to FastAPI:', targetUrl);
+    console.log('[upload] Full URL:', new URL(targetUrl).toString());
+    console.log('[upload] File being sent:', file.name, file.type, file.size);
+
+// Add this BEFORE the fetch to see if URL is correct
+    console.log('[upload] Endpoint path:', new URL(targetUrl).pathname);      
 
     let fastApiResponse: Response;
     const startTime = Date.now();

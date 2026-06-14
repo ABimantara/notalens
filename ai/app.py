@@ -9,12 +9,26 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from ultralytics import YOLO
 import os
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 YOLO_MODEL_PATH = "models/best.pt"
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = FastAPI(title="NotaLens AI API", version="2.0.0")
+ 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://notalens-pijak.vercel.app",  # Your Vercel domain (replace this!)
+        "http://localhost:3000",  # For local testing
+        "*"  # Allow all (simpler, but less secure)
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 try:
     model_yolo = YOLO(YOLO_MODEL_PATH)
     reader = easyocr.Reader(['id', 'en'], gpu=False, verbose=False)
