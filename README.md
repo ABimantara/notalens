@@ -6,7 +6,7 @@ Smart Receipt Intelligence — Aplikasi mobile web untuk manajemen pengeluaran p
 
 NotaLens adalah aplikasi yang memungkinkan pengguna untuk:
 - Scan struk belanja menggunakan kamera atau galeri
-- Ekstraksi data struk otomatis menggunakan AI (YOLO + EasyOCR)
+- Ekstraksi data struk otomatis menggunakan AI (YOLO + EasyOCR + Gemini)
 - Manajemen pengeluaran pribadi dan per workspace/event
 - Rekap pengeluaran bulanan dengan export PDF/Excel
 - Dark mode & light mode
@@ -25,9 +25,19 @@ NotaLens adalah aplikasi yang memungkinkan pengguna untuk:
 - **bcryptjs**
 
 ### AI/OCR
-- **FastAPI** (Python)
+- **FastAPI** (backend API berbasis Python)
 - **YOLOv11** (deteksi area struk)
-- **EasyOCR** (ekstraksi teks)
+- **EasyOCR** (ekstraksi teks dari struk)
+- **Gemini** (konversi hasil OCR ke format JSON)
+
+## 📊 Dataset
+Model YOLOv11 dilatih menggunakan kombinasi dua dataset struk:
+1. **SPLIVU Receipt Dataset (Roboflow)**
+   - Sumber: https://app.roboflow.com/ahmad-rizki-sabani/splivu-12yrv/1
+   - Digunakan untuk anotasi area struk pada gambar.
+2. **Receipt Dataset YOLO (Kaggle)**
+   - Sumber: https://www.kaggle.com/datasets/kartikdullet/receipt-dataset-yolo
+   - Digunakan sebagai data tambahan untuk meningkatkan variasi dan generalisasi model.
 
 ## 🚀 Cara Menjalankan
 
