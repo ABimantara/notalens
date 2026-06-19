@@ -43,7 +43,7 @@ Model YOLOv11 dilatih menggunakan kombinasi dua dataset struk:
 
 | Model | Deskripsi | Tautan |
 |-------|-----------|--------|
-| YOLOv11 Receipt Detection | Model deteksi area struk | [GitHub](https://github.com/ABimantara/notalens/blob/main/ai/models/best.pt) · [Hugging Face](https://huggingface.co/spaces/ahmadrizki05/notalens-ai) |
+| YOLOv11 Receipt Detection | Model deteksi area struk | [G-Drive](https://drive.google.com/file/d/1WmdDvJ3T4Kbs1wSTep2xuOmjPnrihD3D/view?usp=drive_link) · [Hugging Face](https://huggingface.co/spaces/ahmadrizki05/notalens-ai) |
 
 ## 🚀 Cara Menjalankan
 
