@@ -39,6 +39,12 @@ Model YOLOv11 dilatih menggunakan kombinasi dua dataset struk:
    - Sumber: https://www.kaggle.com/datasets/kartikdullet/receipt-dataset-yolo
    - Digunakan sebagai data tambahan untuk meningkatkan variasi dan generalisasi model.
 
+## 🤖 Tautan Model
+
+| Model | Deskripsi | Tautan |
+|-------|-----------|--------|
+| YOLOv11 Receipt Detection | Model deteksi area struk | [GitHub](https://github.com/ABimantara/notalens/blob/main/ai/models/best.pt) · [Hugging Face](https://huggingface.co/spaces/ahmadrizki05/notalens-ai) |
+
 ## 🚀 Cara Menjalankan
 
 ### Prerequisites
@@ -64,6 +70,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 JWT_SECRET=your-jwt-secret
 FASTAPI_URL=http://localhost:8000
+GEMINI_API_KEY=API_KEY_GEMINI
 ```
 
 ### 3. Install Dependencies & Jalankan Next.js
@@ -87,5 +94,5 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 FastAPI berjalan di `http://localhost:8000`
-
+> Model YOLO (`best.pt`) sudah tersedia di folder `ai/models/`. Untuk versi deployed, model di-load dari Hugging Face secara otomatis.
 > ⚠️ **Kedua server harus berjalan bersamaan** untuk fitur scan berfungsi.
